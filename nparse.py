@@ -2,15 +2,17 @@
 import os
 import sys
 import webbrowser
+import glob
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCursor, QFontDatabase, QIcon
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QMenu, QMessageBox,
-                             QSystemTrayIcon)
+                             QSystemTrayIcon, QDialog, QComboBox, QPushButton)
 
 import parsers
 from helpers import config, logreader, resource_path, get_version
 from helpers.settings import SettingsWindow
+from helpers.logselect import LogSelect
 
 config.load('nparse.config.json')
 # validate settings file
@@ -45,7 +47,10 @@ class NomnsParse(QApplication):
         # Tray Icon
         self._system_tray = QSystemTrayIcon()
         self._system_tray.setIcon(QIcon(resource_path('data/ui/icon.png')))
-        self._system_tray.setToolTip("nParse")
+        if config.data['general']['eq_char_log']:
+            self._system_tray.setToolTip("nParse - " + config.data['general']['eq_char_log'])
+        else:
+            self._system_tray.setToolTip("nParse - no character log selected")
         # self._system_tray.setContextMenu(self._create_menu())
         self._system_tray.activated.connect(self._menu)
         self._system_tray.show()
@@ -85,7 +90,8 @@ class NomnsParse(QApplication):
 
             else:
                 self._log_reader = logreader.LogReader(
-                    config.data['general']['eq_log_dir'])
+                    config.data['general']['eq_log_dir'],
+                    config.data['general']['eq_char_log'])
                 self._log_reader.new_line.connect(self._parse)
                 self._toggled = True
         else:
@@ -116,6 +122,8 @@ class NomnsParse(QApplication):
         menu.addSeparator()
         get_eq_dir_action = menu.addAction('Select EQ Logs Directory')
         menu.addSeparator()
+        get_eq_char_action = menu.addAction('Select EQ Character Log')
+        menu.addSeparator()
 
         parser_toggles = set()
         for parser in self._parsers:
@@ -141,6 +149,20 @@ class NomnsParse(QApplication):
                 config.data['general']['eq_log_dir'] = dir_path
                 config.save()
                 self._toggle()
+
+        elif action == get_eq_char_action:
+            if config.data['general']['eq_log_dir']:
+                self._logselect = LogSelect()
+                self._logselect.exec_()
+                del self._logselect
+                self._toggle()
+                self._toggle()
+            else:
+               errbox = QMessageBox()
+               errbox.setWindowTitle("EQ Log Dir Error")
+               errbox.setText("Error: select an EQ log directory first")
+               errbox.setIcon(QMessageBox.Critical)
+               errbox.exec_()
 
         elif action == settings_action:
             if self._settings.exec_():
@@ -184,7 +206,6 @@ class NomnsParse(QApplication):
                     return True
         except:
             return False
-
 
 if __name__ == "__main__":
     try:

@@ -49,6 +49,10 @@ def verify_settings():
         data['general'].get('eq_log_dir', ''),
         ''
         )
+    data['general']['eq_char_log'] = get_setting(
+        data['general'].get('eq_char_log', ''),
+        ''
+        )
     data['general']['parser_opacity'] = get_setting(
         data['general'].get('parser_opacity', 80),
         80,

@@ -445,7 +445,7 @@ class SpellTrigger(QObject):
 def create_spell_book():
     """ Returns a dictionary of Spell by k, v -> spell_name, Spell() """
     spell_book = {}
-    with open('data/spells/spells_us.txt') as spell_file:
+    with open('data/spells/spells_en.txt') as spell_file:
         for line in spell_file:
             values = line.strip().split('^')
             spell_book[values[1]] = Spell(
@@ -454,16 +454,16 @@ def create_spell_book():
                 effect_text_you=values[6],
                 effect_text_other=values[7],
                 effect_text_worn_off=values[8],
-                aoe_range=int(values[10]),
-                max_targets=(6 if int(values[10]) > 0 else 1),
-                cast_time=int(values[13]),
-                resist_type=int(values[85]),
+                aoe_range=(0 if not values[10] else int(values[10])),
+                max_targets=(1 if not values[10] or int(values[10]) == 0 else 6),
+                cast_time=(0 if not values[13] else int(values[13])),
+                resist_type=(0 if not values[73] else int(values[73])),
                 duration_formula=int(values[16]),
-                pvp_duration_formula=int(values[181]),
-                duration=int(values[17]),
-                pvp_duration=int(values[182]),
-                type=int(values[83]),
-                spell_icon=int(values[144])
+                pvp_duration_formula=int(values[16]),
+                duration=(0 if not values[17] else int(values[17])),
+                pvp_duration=(0 if not values[17] else int(values[17])),
+                type=int(values[71]),
+                spell_icon=int(values[131])
             )
     return spell_book
 

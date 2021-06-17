@@ -47,7 +47,10 @@ class Spells(ParserWindow):
         self._level_widget = QSpinBox()
         self._level_widget.setRange(1, 65)
         self._level_widget.setValue(config.data['spells']['level'])
-        self._level_widget.setPrefix('lvl. ')
+        if config.data['general']['eq_charname']:
+            self._level_widget.setPrefix(config.data['general']['eq_charname'] + ' lvl. ')
+        else:
+            self._level_widget.setPrefix('(NoCharSelected) lvl. ')
         self.menu_area.addWidget(self._level_widget, 0)
         self._level_widget.valueChanged.connect(self._level_change)
 

@@ -1,4 +1,4 @@
-import glob
+import glob, re
 
 from PyQt5.QtWidgets import (QDialog, QComboBox, QPushButton)
 
@@ -33,5 +33,8 @@ class LogSelect(QDialog):
 
     def set_char_log(self, text):
         config.data['general']['eq_char_log'] = text
+        charname = re.sub(".*eqlog_","",text)
+        charname = re.sub("_loginse.*","",charname)
+        config.data['general']['eq_charname'] = charname
         config.save()
         self.close()

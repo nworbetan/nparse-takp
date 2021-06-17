@@ -22,7 +22,7 @@ os.environ['QT_SCALE_FACTOR'] = str(
     config.data['general']['qt_scale_factor'] / 100)
 
 
-CURRENT_VERSION = '0.5.1'
+CURRENT_VERSION = '0.6.0'
 if config.data['general']['update_check']:
     ONLINE_VERSION = get_version()
 else:
@@ -140,7 +140,7 @@ class NomnsParse(QApplication):
         action = menu.exec_(QCursor.pos())
 
         if action == check_version_action:
-            webbrowser.open('https://github.com/nomns/nparse/releases')
+            webbrowser.open('https://github.com/hitechhippie/nparse-takp/releases')
 
         elif action == get_eq_dir_action:
             dir_path = str(QFileDialog.getExistingDirectory(
@@ -155,8 +155,10 @@ class NomnsParse(QApplication):
                 self._logselect = LogSelect()
                 self._logselect.exec_()
                 del self._logselect
+                config.load('nparse.config.json')
                 self._toggle()
                 self._toggle()
+                self._load_parsers()
             else:
                errbox = QMessageBox()
                errbox.setWindowTitle("EQ Log Dir Error")

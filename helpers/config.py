@@ -53,6 +53,10 @@ def verify_settings():
         data['general'].get('eq_char_log', ''),
         ''
         )
+    data['general']['eq_charname'] = get_setting(
+        data['general'].get('eq_charname', ''),
+        ''
+        )
     data['general']['parser_opacity'] = get_setting(
         data['general'].get('parser_opacity', 80),
         80,

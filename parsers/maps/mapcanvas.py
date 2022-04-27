@@ -108,11 +108,16 @@ class MapCanvas(QGraphicsView):
             for path in self._data[z]['paths'].childItems():
                 if z == current_z_level or not config.data['maps']['use_z_layers']:
                     pen = path.pen()
-                    pen.setWidth(max(
-                        config.data['maps']['line_width'] + bolded,
-                        (config.data['maps']['line_width'] +
-                         bolded) / self._scale
-                    ))
+                    #pen.setWidth(max(
+                    #    config.data['maps']['line_width'] + bolded,
+                    #    (config.data['maps']['line_width'] +
+                    #     bolded) / self._scale
+                    #))
+                    pen.setWidth(int(
+                        max(
+                            config.data['maps']['line_width'] + bolded,
+                            (config.data['maps']['line_width'] + bolded) / self._scale
+                    )))
                     path.setPen(pen)
                 else:
                     pen = path.pen()
@@ -181,10 +186,11 @@ class MapCanvas(QGraphicsView):
         # grid lines
         if config.data['maps']['show_grid']:
             pen = self._data.grid.pen()
-            pen.setWidth(max(
-                config.data['maps']['grid_line_width'],
-                self.to_scale(config.data['maps']['grid_line_width'])
-            ))
+            pen.setWidth(int(
+                max(
+                    config.data['maps']['grid_line_width'],
+                    self.to_scale(config.data['maps']['grid_line_width'])
+            )))
             self._data.grid.setPen(pen)
             self._data.grid.setVisible(True)
         else:

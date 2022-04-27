@@ -412,10 +412,10 @@ class SpellTrigger(QObject):
             #  just in case user set casting window buffer super low, create offset for more accuracy.
             msec_offset = (datetime.datetime.now() -
                            self.timestamp).total_seconds() * 1000
-            self._times_up_timer.start(
-                self.spell.cast_time + config.data['spells']['casting_window_buffer'] - msec_offset)
-            self._activate_timer.start(
-                self.spell.cast_time - config.data['spells']['casting_window_buffer'] - msec_offset)
+            self._times_up_timer.start(int(
+                self.spell.cast_time + config.data['spells']['casting_window_buffer'] - msec_offset))
+            self._activate_timer.start(int(
+                self.spell.cast_time - config.data['spells']['casting_window_buffer'] - msec_offset))
         else:
             self.activated = True
 

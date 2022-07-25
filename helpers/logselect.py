@@ -25,7 +25,7 @@ class LogSelect(QDialog):
         btnchar.clicked.connect(self.cancelled)
 
         if config.data['general']['eq_log_dir']:
-            for logfile in glob.glob(config.data['general']['eq_log_dir'] + '/eqlog_*'):
+            for logfile in sorted(glob.glob(config.data['general']['eq_log_dir'] + '/eqlog_*')):
                 listcharbox.addItem(logfile)
 
     def cancelled(self):

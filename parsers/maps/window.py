@@ -71,7 +71,7 @@ class Maps(ParserWindow):
             pass
         if text[:16] == 'You have entered':
             mapname = text[17:-1]
-            if mapname.removesuffix(" B") in ["Plane of Earth", "Plane of Time"]:
+            if mapname.replace(" B", "") in ["Plane of Earth", "Plane of Time"]:
                 self.use_alt_map.setEnabled(True)
                 self.use_alt_map.setToolTip('Alternate Map Available')
             else:
@@ -95,7 +95,7 @@ class Maps(ParserWindow):
              # switch to "A" here to prepare the button to switch back where we came from
             self.use_alt_map.setToolTip("Switch To \"A\" Map")
         elif this_zone in ["Plane of Earth B", "Plane of Time B"]:
-            next_zone = this_zone.removesuffix(" B")
+            next_zone = this_zone.replace(" B", "")
             self.use_alt_map.setChecked(False)
              # switch to "B" here to prepare the button to switch back where we came from
             self.use_alt_map.setToolTip("Switch To \"B\" Map")

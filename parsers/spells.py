@@ -17,8 +17,9 @@ class Spells(ParserWindow):
     def __init__(self):
         super().__init__()
         self.name = 'spells'
-        self.setWindowTitle(self.name.title())
-        self.set_title(self.name.title())
+        nameTitle = config.data['general']['eq_charname'] + ' - ' + self.name.title()
+        self.setWindowTitle(nameTitle)
+        self.set_title(nameTitle)
 
         self._setup_ui()
 

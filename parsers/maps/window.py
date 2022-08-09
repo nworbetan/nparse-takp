@@ -13,14 +13,21 @@ class Maps(ParserWindow):
     def __init__(self):
         super().__init__()
         self.name = 'maps'
-        self.setWindowTitle(self.name.title())
-        self.set_title(self.name.title())
+        nameTitle = config.data['general']['eq_charname'] + ' - ' + self.name.title()
+        self.setWindowTitle(nameTitle)
+        self.set_title(nameTitle)
 
         # interface
         self._map = MapCanvas()
         self.content.addWidget(self._map, 1)
         # buttons
         button_layout = QHBoxLayout()
+        self.use_alt_map = QPushButton('B')
+        self.use_alt_map.setCheckable(True)
+        self.use_alt_map.setEnabled(False)
+        self.use_alt_map.setToolTip('Alternate Map N/A')
+        self.use_alt_map.clicked.connect(self._toggle_use_alt_map)
+        button_layout.addWidget(self.use_alt_map)
         show_poi = QPushButton('\u272a')
         show_poi.setCheckable(True)
         show_poi.setChecked(config.data['maps']['show_poi'])
@@ -63,13 +70,40 @@ class Maps(ParserWindow):
         if text[:23] == 'LOADING, PLEASE WAIT...':
             pass
         if text[:16] == 'You have entered':
-            self._map.load_map(text[17:-1])
+            mapname = text[17:-1]
+            if mapname.replace(" B", "") in ["Plane of Earth", "Plane of Time"]:
+                self.use_alt_map.setEnabled(True)
+                self.use_alt_map.setToolTip('Alternate Map Available')
+            else:
+                self.use_alt_map.setEnabled(False)
+                self.use_alt_map.setChecked(False)
+                self.use_alt_map.setToolTip('Alternate Map N/A')
+            self._map.load_map(mapname)
         if text[:16] == 'Your Location is':
             x, y, z = [float(value) for value in text[17:].strip().split(',')]
             x, y = to_real_xy(x, y)
             self._map.add_player('__you__', timestamp, MapPoint(x=x, y=y, z=z))
+            self._map.update_()
 
     # events
+    def _toggle_use_alt_map(self, _):
+        this_zone = self._map._data.zone
+        next_zone = this_zone
+        if this_zone in ["Plane of Earth", "Plane of Time"]:
+            next_zone = this_zone + " B"
+            self.use_alt_map.setChecked(True)
+             # switch to "A" here to prepare the button to switch back where we came from
+            self.use_alt_map.setToolTip("Switch To \"A\" Map")
+        elif this_zone in ["Plane of Earth B", "Plane of Time B"]:
+            next_zone = this_zone.replace(" B", "")
+            self.use_alt_map.setChecked(False)
+             # switch to "B" here to prepare the button to switch back where we came from
+            self.use_alt_map.setToolTip("Switch To \"B\" Map")
+
+        if next_zone != this_zone:
+            self._map.load_map(next_zone)
+            self._map.update_()
+    
     def _toggle_show_poi(self, _):
         config.data['maps']['show_poi'] = not config.data['maps']['show_poi']
         config.save()

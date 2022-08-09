@@ -121,10 +121,11 @@ class MapCanvas(QGraphicsView):
                     path.setPen(pen)
                 else:
                     pen = path.pen()
-                    pen.setWidth(max(
-                        config.data['maps']['line_width'] - 0.8,
-                        (config.data['maps']['line_width'] - 0.8) / self._scale
-                    ))
+                    pen.setWidth(int(
+                        max(
+                            config.data['maps']['line_width'] - 0.8,
+                            (config.data['maps']['line_width'] - 0.8) / self._scale
+                    )))
                     path.setPen(pen)
 
             self._data[z]['paths'].setOpacity(alpha)

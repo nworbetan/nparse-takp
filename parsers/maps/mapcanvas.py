@@ -2,22 +2,21 @@
 import traceback
 
 
-from PyQt5.QtCore import Qt, QPointF
+from PyQt5.QtCore import Qt, QPointF, pyqtSignal
 from PyQt5.QtGui import QPainter, QTransform
 from PyQt5.QtWidgets import (QGraphicsScene, QGraphicsView, QInputDialog,
-                             QMenu)
+                             QMenu, QWidgetAction, QSpinBox)
 
 from helpers import config, to_range, text_time_to_seconds
 
-from .mapclasses import MapPoint, WayPoint, Player, SpawnPoint, MouseLocation
+from .mapclasses import MapPoint, WayPoint, Player, SpawnPoint, MouseLocation, MapCircle
 from .mapdata import MapData
 
 
 class MapCanvas(QGraphicsView):
     """Map Widget for Everquest Map Files."""
-
+    new_zone = pyqtSignal(object)
     def __init__(self):
-
         self._data = None
         # UI Init
         super().__init__()
@@ -34,6 +33,7 @@ class MapCanvas(QGraphicsView):
         self.setScene(self._scene)
         self._scale = config.data['maps']['scale']
         self._mouse_location = MouseLocation()
+        self._remember_this_radius = 100
 
     def load_map(self, map_name):
         try:
@@ -60,6 +60,7 @@ class MapCanvas(QGraphicsView):
             )
             self._mouse_location = MouseLocation()
             self._scene.addItem(self._mouse_location)
+            self.new_zone.emit(self._data.zone)
             config.data['maps']['last_zone'] = self._data.zone
             config.save()
 
@@ -108,11 +109,6 @@ class MapCanvas(QGraphicsView):
             for path in self._data[z]['paths'].childItems():
                 if z == current_z_level or not config.data['maps']['use_z_layers']:
                     pen = path.pen()
-                    #pen.setWidth(max(
-                    #    config.data['maps']['line_width'] + bolded,
-                    #    (config.data['maps']['line_width'] +
-                    #     bolded) / self._scale
-                    #))
                     pen.setWidth(int(
                         max(
                             config.data['maps']['line_width'] + bolded,
@@ -158,19 +154,35 @@ class MapCanvas(QGraphicsView):
         if self._data.way_point:
             self._data.way_point.update_(self.to_scale())
             if config.data['maps']['use_z_layers']:
-                self._data.way_point.pixmap.setOpacity(
-                    current_alpha if (self._data.way_point.location.z ==
-                                      current_z_level) else other_alpha
-                )
-                player = self._data.players.get('__you__', None)
-                if player and current_z_level in \
-                        [self._data.way_point.location.z, player.z_level]:
+                if current_z_level in [
+                        self._data.get_closest_z_group(self._data.way_point.start_loc.z),
+                        self._data.way_point.end_loc.z]:
+                    self._data.way_point.setOpacity(current_alpha)
+                else:
+                    self._data.way_point.setOpacity(other_alpha)
+
+                if self._data.players.get('__you__', None) and current_z_level in [
+                        self._data.get_closest_z_group(self._data.way_point.start_loc.z),
+                        self._data.way_point.end_loc.z]:
                     self._data.way_point.line.setOpacity(current_alpha)
                 else:
                     self._data.way_point.line.setOpacity(other_alpha)
 
             else:
-                self._data.way_point.pixmap.setOpacity(current_alpha)
+                self._data.way_point.setOpacity(current_alpha)
+
+        #circles
+        for c in self._data.circles:
+            c.text.setScale(self.to_scale())
+            c.chh.setScale(self.to_scale())
+            c.chv.setScale(self.to_scale())
+            if config.data['maps']['use_z_layers']:
+                if c.location.z == current_z_level:
+                    c.setOpacity(current_alpha)
+                else:
+                    c.setOpacity(other_alpha)
+            else:
+                c.setOpacity(current_alpha)
 
         # spawns
         for spawn in self._data.spawns:
@@ -213,14 +225,18 @@ class MapCanvas(QGraphicsView):
     def add_player(self, name, timestamp, location):
         if name not in self._data.players.keys():
             self._data.players[name] = Player(
-                name=name,
-                location=location,
-                timestamp=timestamp)
+                name = name,
+                location = location,
+                previous_location = location,
+                timestamp = timestamp,
+                scl = self.to_scale()
+            )
             self._scene.addItem(self._data.players[name])
         else:
             self._data.players[name].previous_location = self._data.players[name].location
             self._data.players[name].location = location
             self._data.players[name].timestamp = timestamp
+
         self._data.players[name].z_level = self._data.get_closest_z_group(
             self._data.players[name].location.z
         )
@@ -236,7 +252,7 @@ class MapCanvas(QGraphicsView):
         if self._data.way_point and name == '__you__':
             self._data.way_point.update_(
                 self.to_scale(),
-                location=location
+                new_start_loc = location
             )
 
         if name == '__you__' and config.data['maps']['auto_follow']:
@@ -299,6 +315,9 @@ class MapCanvas(QGraphicsView):
         self.center()
         QGraphicsView.resizeEvent(self, event)
 
+    def _set_the_radius(self, event):
+        self._remember_this_radius = event
+
     def contextMenuEvent(self, event):
         # create menu
         pos = self.mapToScene(event.pos())
@@ -309,9 +328,20 @@ class MapCanvas(QGraphicsView):
         spawn_point_create = spawn_point_menu.addAction('Create on Cursor')
         spawn_point_delete = spawn_point_menu.addAction('Delete on Cursor')
         spawn_point_delete_all = spawn_point_menu.addAction('Delete All')
-        way_point_menu = menu.addMenu('Way Point')
+        way_point_menu = menu.addMenu('Ruler')
         way_point_create = way_point_menu.addAction('Create on Cursor')
         way_point_delete = way_point_menu.addAction('Clear')
+        circle_menu = menu.addMenu('Radius')
+        radius_action = QWidgetAction(circle_menu)
+        radius_input = QSpinBox()
+        radius_input.setRange(10, 1000)
+        radius_input.setValue(self._remember_this_radius)
+        radius_input.valueChanged.connect(self._set_the_radius)
+        radius_action.setDefaultWidget(radius_input)
+        circle_radius = circle_menu.addAction(radius_action)
+        circle_create = circle_menu.addAction('Create on Cursor')
+        circle_delete = circle_menu.addAction('Delete on Cursor')
+        circle_delete_all = circle_menu.addAction('Delete All')
         load_map = menu.addAction('Load Map')
 
         # execute
@@ -331,12 +361,12 @@ class MapCanvas(QGraphicsView):
             dialog.deleteLater()
 
             spawn = SpawnPoint(
-                location=MapPoint(
-                    x=pos.x(),
-                    y=pos.y(),
-                    z=self._data.geometry.z_groups[self._z_index]
+                location = MapPoint(
+                    x = pos.x(),
+                    y = pos.y(),
+                    z = self._data.geometry.z_groups[self._z_index]
                 ),
-                length=spawn_time
+                length = spawn_time
             )
 
             self._scene.addItem(spawn)
@@ -348,7 +378,7 @@ class MapCanvas(QGraphicsView):
                 pos.x(), pos.y(), QTransform())
             if pixmap:
                 group = pixmap.parentItem()
-                if group:
+                if group in self._data.spawns:
                     self._data.spawns.remove(group)
                     self._scene.removeItem(group)
 
@@ -359,26 +389,63 @@ class MapCanvas(QGraphicsView):
 
         if action == way_point_create:
             if self._data.way_point:
-                self._scene.removeItem(self._data.way_point.pixmap)
+                self._scene.removeItem(self._data.way_point)
                 self._scene.removeItem(self._data.way_point.line)
                 self._data.way_point = None
 
-            self._data.way_point = WayPoint(
-                location=MapPoint(
-                    x=pos.x(),
-                    y=pos.y(),
-                    z=self._data.geometry.z_groups[self._z_index]
+            if '__you__' in self._data.players:
+                sp_loc = self._data.players['__you__'].location
+            else:
+                sp_loc = MapPoint(
+                    x = pos.x(),
+                    y = pos.y(),
+                    z = self._data.geometry.z_groups[self._z_index]
                 )
+
+            self._data.way_point = WayPoint(
+                end_loc = MapPoint(
+                    x = pos.x(),
+                    y = pos.y(),
+                    z = self._data.geometry.z_groups[self._z_index]
+                ),
+                start_loc = sp_loc
             )
 
-            self._scene.addItem(self._data.way_point.pixmap)
+            self._scene.addItem(self._data.way_point)
             self._scene.addItem(self._data.way_point.line)
 
         if action == way_point_delete:
             if self._data.way_point:
-                self._scene.removeItem(self._data.way_point.pixmap)
+                self._scene.removeItem(self._data.way_point)
                 self._scene.removeItem(self._data.way_point.line)
             self._data.way_point = None
+
+        if action == circle_create:
+            a_circle = MapCircle(
+                location = MapPoint(
+                    x = pos.x(),
+                    y = pos.y(),
+                    z = self._data.geometry.z_groups[self._z_index]
+                ),
+                radius = self._remember_this_radius
+            )
+
+            self._scene.addItem(a_circle)
+            self._data.circles.append(a_circle)
+
+        if action == circle_delete:
+            pixmap = self._scene.itemAt(
+                pos.x(), pos.y(), QTransform())
+            if pixmap:
+                group = pixmap.parentItem()
+                if group in self._data.circles:
+                    self._data.circles.remove(group)
+                    self._scene.removeItem(group)
+
+        if action == circle_delete_all:
+            for c in self._data.circles:
+                self._scene.removeItem(c)
+            self._data.circles = []
 
         if action == load_map:
             dialog = QInputDialog(self)
@@ -386,6 +453,7 @@ class MapCanvas(QGraphicsView):
             dialog.setLabelText('Select map to load:')
             dialog.setComboBoxItems(
                 sorted([map.title() for map in MapData.get_zone_dict().keys()]))
+            dialog.setTextValue(self._data.zone.title())
             if dialog.exec_():
                 self.load_map(dialog.textValue().lower())
             dialog.deleteLater()

@@ -2,14 +2,13 @@ import datetime
 
 from PyQt5.QtCore import Qt, QTimer, QPointF
 from PyQt5.QtGui import QPixmap, QPen
-from PyQt5.QtWidgets import (QGraphicsItemGroup, QGraphicsLineItem,
+from PyQt5.QtWidgets import (QGraphicsItemGroup, QGraphicsLineItem, QGraphicsEllipseItem,
                              QGraphicsPixmapItem, QGraphicsTextItem)
 
 from helpers import format_time, get_degrees_from_line, to_eq_xy, to_real_xy
 
 
 class MouseLocation(QGraphicsTextItem):
-
     def __init__(self, **kwargs):
         super().__init__()
         self.setZValue(100)
@@ -38,7 +37,6 @@ class MouseLocation(QGraphicsTextItem):
 
 
 class PointOfInterest:
-
     def __init__(self, **kwargs):
         super().__init__()
         self.location = MapPoint()
@@ -63,13 +61,13 @@ class PointOfInterest:
 
 
 class Player(QGraphicsItemGroup):
-
     def __init__(self, **kwargs):
         super().__init__()
         self.name = ''
         self.location = MapPoint()
         self.previous_location = MapPoint()
         self.timestamp = None  # datetime
+        self.scl = 1
         self.__dict__.update(kwargs)
         self.icon = QGraphicsPixmapItem(
             QPixmap('data/maps/user.png')
@@ -84,23 +82,22 @@ class Player(QGraphicsItemGroup):
         self.addToGroup(self.directional)
         self.setZValue(10)
         self.z_level = 0
+        self.setScale(self.scl)
 
     def update_(self, scale):
-        if self.previous_location:
+        self.setScale(scale)
+        if self.previous_location != self.location:
             self.directional.setRotation(
                 get_degrees_from_line(
                     self.location.x, self.location.y,
                     self.previous_location.x, self.previous_location.y
                 )
             )
-            self.setScale(scale)
-            self.setPos(self.location.x, self.location.y)
             self.directional.setVisible(True)
         self.setPos(self.location.x, self.location.y)
 
 
 class SpawnPoint(QGraphicsItemGroup):
-
     def __init__(self, **kwargs):
         super().__init__()
         self.location = MapPoint()
@@ -176,40 +173,111 @@ class MapPoint:
         self.__dict__.update(kwargs)
 
 
-class WayPoint:
-
+class WayPoint(QGraphicsItemGroup):
     def __init__(self, **kwargs):
         super().__init__()
-        self.location = MapPoint()
+        self.start_loc = MapPoint()
+        self.end_loc = MapPoint()
         self.__dict__.update(kwargs)
 
-        self.pixmap = QGraphicsPixmapItem(QPixmap('data/maps/waypoint.png'))
-        self.pixmap.setOffset(-10, -20)
+        pixmap = QGraphicsPixmapItem(QPixmap('data/maps/waypoint.png'))
+        pixmap.setOffset(-10, -20)
+        self.addToGroup(pixmap)
+        self.pixmap = pixmap
+        self.pixmap.setVisible(True)
+        self.pixmap.setZValue(8)
+
+        text = QGraphicsTextItem('0')
+        self.addToGroup(text)
+        self.text = text
+        self.text.setVisible(self.start_loc.x != self.end_loc.x or self.start_loc.y != self.end_loc.y)
+        self.text.setZValue(6)
+
+        ch_pen = QPen(Qt.white, 1, Qt.SolidLine)
+        self.chh = QGraphicsLineItem(-10, 0, 10, 0)
+        self.chh.setPen(ch_pen)
+        self.chh.setVisible(True)
+        self.chh.setZValue(7)
+        self.addToGroup(self.chh)
+
+        self.chv = QGraphicsLineItem(0, -10, 0, 10)
+        self.chv.setPen(ch_pen)
+        self.chv.setVisible(True)
+        self.chv.setZValue(7)
+        self.addToGroup(self.chv)
 
         self.line = QGraphicsLineItem(
-            0.0, 0.0, self.location.x, self.location.y)
+            self.start_loc.x, self.start_loc.y, self.end_loc.x, self.end_loc.y)
         self.line.setPen(QPen(
             Qt.green, 1, Qt.DashLine
         ))
-        self.line.setVisible(False)
-
-        self.pixmap.setZValue(5)
+        self.line.setVisible(self.start_loc.x != self.end_loc.x or self.start_loc.y != self.end_loc.y)
         self.line.setZValue(4)
+        self.setZValue(5)
 
-        self.pixmap.setPos(self.location.x, self.location.y)
+        self.setPos(self.end_loc.x, self.end_loc.y)
+        self.text.setHtml(
+            "<body bgcolor='magenta'><font color='white' size='2'>{}</font></body>".format(
+            str(int(self.line.line().length())))
+        )
 
-    def update_(self, scale, location=None):
-        self.pixmap.setScale(scale)
-        if location:
+    def update_(self, scale, new_start_loc=None):
+        self.setScale(scale)
+        if new_start_loc:
+            self.start_loc.x = new_start_loc.x
+            self.start_loc.y = new_start_loc.y
+            self.start_loc.z = new_start_loc.z
+
             line = self.line.line()
-            line.setP1(QPointF(location.x, location.y))
+            line.setP1(QPointF(self.start_loc.x, self.start_loc.y))
             self.line.setLine(line)
-
-            pen = self.line.pen()
-            pen.setWidth(1 / scale)
-            self.line.setPen(pen)
-
             self.line.setVisible(True)
+
+            self.text.setHtml(
+                "<body bgcolor='magenta'><font color='white' size='2'>{}</font></body>".format(
+                str(int(line.length())))
+            )
+            self.text.setVisible(True)
+
+
+class MapCircle(QGraphicsItemGroup):
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.location = MapPoint()
+        self.radius = 0
+        self.__dict__.update(kwargs)
+
+        circle = QGraphicsEllipseItem(-self.radius, -self.radius, 2*self.radius, 2*self.radius)
+        circle.setPen(QPen(Qt.blue, 1, Qt.SolidLine))
+        self.addToGroup(circle)
+        self.circle = circle
+        self.circle.setVisible(True)
+
+        text = QGraphicsTextItem('0')
+        self.addToGroup(text)
+        self.text = text
+        self.text.setHtml(
+            "<body bgcolor='blue'><font color='white' size='2'>{}</font></body>".format(
+            str(self.radius))
+        )
+        self.text.setVisible(True)
+        self.text.setZValue(6)
+
+        ch_pen = QPen(Qt.white, 1, Qt.SolidLine)
+        self.chh = QGraphicsLineItem(-10, 0, 10, 0)
+        self.chh.setPen(ch_pen)
+        self.chh.setVisible(True)
+        self.chh.setZValue(7)
+        self.addToGroup(self.chh)
+
+        self.chv = QGraphicsLineItem(0, -10, 0, 10)
+        self.chv.setPen(ch_pen)
+        self.chv.setVisible(True)
+        self.chv.setZValue(7)
+        self.addToGroup(self.chv)
+
+        self.setPos(self.location.x, self.location.y)
+        self.setZValue(5)
 
 
 class MapLine:

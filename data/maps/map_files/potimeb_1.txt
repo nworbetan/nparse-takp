@@ -1,6 +1,44 @@
-P -867.0000, 7.0000, 0.0000, 255, 0, 0, 3, to_The_Plane_of_Time
-P 150.0000, -1615.0000, 0.0000, 255, 255, 255, 2, Earth_Trial
-P 150.0000, -1315.0000, 0.0000, 255, 255, 255, 2, Air_Trial
-P 150.0000, -1100.0000, 0.0000, 255, 255, 255, 2, Undead_Trial
-P 150.0000, -850.0000, 0.0000, 255, 255, 255, 2, Water_Trial
-P 150.0000, -565.0000, 0.0000, 255, 255, 255, 2, Fire_Trial
+P -867.0, 7.0, 390.0, 255, 0, 0, 3, to: Plane Of Time
+P -851.0, 151.0, 390, 255, 0, 0, 2, Succor
+P 100.0, -1630.0, 490.0, 255, 255, 255, 2, Earth Trial
+P 100.0, -1350.0, 490.0, 255, 255, 255, 2, Air Trial
+P 100.0, -1115.0, 490.0, 255, 255, 255, 2, Undead Trial
+P 100.0, -855.0, 490.0, 255, 255, 255, 2, Water Trial
+P 100.0, -575.0, 490.0, 255, 255, 255, 2, Fire Trial
+P -75.0, -1640.0, 490.0, 240, 127, 0, 2, Terlok of Earth
+P -75.0, -1355.0, 490.0, 240, 127, 0, 2, Neimon of Air
+P -75.0, -1105.0, 490.0, 240, 127, 0, 2, Rythor of the Undead
+P -75.0, -865.0, 490.0, 240, 127, 0, 2, Anar of Water
+P -75.0, -570.0, 490.0, 240, 127, 0, 2, Kazrok of Fire
+P -200.0, -1630.0, 490.0, 240, 127, 0, 2, Earthen Overseer
+P -200.0, -1350.0, 490.0, 240, 127, 0, 2, Windshapen Warlord of Air
+P -200.0, -1115.0, 490.0, 240, 127, 0, 2, Ralthos Enrok
+P -200.0, -855.0, 490.0, 240, 127, 0, 2, Gutripping War Beast
+P -200.0, -575.0, 490.0, 240, 127, 0, 2, War Shapen Emissary
+P 304.0, -298.0, 345.0, 240, 127, 0, 2, Terris-Thule
+P 304.0, 304.0, 345.0, 240, 127, 0, 2, Saryrn
+P -355, 135, 345.0, 240, 127, 0, 2, Tallon Zek
+P -355, -135, 345.0, 240, 127, 0, 2, Vallon Zek
+P 304.0, -298.0, 1.0, 240, 127, 0, 2, Cazic-Thule
+P 304.0, 304.0, 1.0, 240, 127, 0, 2, Bertoxxulous
+P -300, 304, 1.0, 240, 127, 0, 2, Rallos Zek
+P -300, -304, 1.0, 240, 127, 0, 2, Innoruuk
+P 550.0, 1118.0, -1.0, 240, 127, 0, 2, Quarm
+P -3000, 000, 0, 240, 127, 0, 2, ETC:
+P -3000, 100, 0, 240, 127, 0, 2, Avatar_of_the_Elements
+P -3000, 200, 0, 240, 127, 0, 2, Champion_of_Torment
+P -3000, 300, 0, 240, 127, 0, 2, Dark_Knight_of_Terris
+P -3000, 400, 0, 240, 127, 0, 2, A_Deadly_Warboar
+P -3000, 500, 0, 240, 127, 0, 2, Deathbringer_Rianit
+P -3000, 600, 0, 240, 127, 0, 2, Deathbringer_Skullsmash
+P -3000, 700, 0, 240, 127, 0, 2, Dersool_Fal'Giersnaol
+P -3000, 800, 0, 240, 127, 0, 2, Dreamwarp
+P -3000, 900, 0, 240, 127, 0, 2, A_Ferocious_Warboar
+P -3000, 1000, 0, 240, 127, 0, 2, Herlsoakian
+P -3000, 1100, 0, 240, 127, 0, 2, Kraksmaal_Fir'Dethsin
+P -3000, 1200, 0, 240, 127, 0, 2, A_Needletusk_Warboar
+P -3000, 1300, 0, 240, 127, 0, 2, Sinrunal_Gorgedreal
+P -3000, 1400, 0, 240, 127, 0, 2, Supernatural_Guardian
+P -3000, 1500, 0, 240, 127, 0, 2, Undead_Squad_Leader
+P -3000, 1600, 0, 240, 127, 0, 2, Xeroan_Xi'Geruonask
+P -3000, 1700, 0, 240, 127, 0, 2, Xerskel_Gerodnsal

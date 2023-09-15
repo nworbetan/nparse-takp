@@ -24,6 +24,7 @@ class MapData(dict):
         self.spawns = []
         self.way_point = None
         self.grid = None
+        self.circles = []
 
         if self.zone is not None:
             self._load()

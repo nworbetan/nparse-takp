@@ -15,7 +15,6 @@ class Maps(ParserWindow):
         self.name = 'maps'
         nameTitle = config.data['general']['eq_charname'] + ' - ' + self.name.title()
         self.setWindowTitle(nameTitle)
-        self.set_title(nameTitle)
 
         # interface
         self._map = MapCanvas()
@@ -61,10 +60,12 @@ class Maps(ParserWindow):
 
         self.menu_area.addLayout(button_layout)
 
+        self._map.new_zone.connect(self.set_title_zone_name)
+
         if config.data['maps']['last_zone']:
             self._map.load_map(config.data['maps']['last_zone'])
         else:
-            self._map.load_map('west freeport')
+            self._map.load_map('plane of knowledge')
 
     def parse(self, timestamp, text):
         if text[:23] == 'LOADING, PLEASE WAIT...':
@@ -83,7 +84,6 @@ class Maps(ParserWindow):
             x, y, z = [float(value) for value in text[17:].strip().split(',')]
             x, y = to_real_xy(x, y)
             self._map.add_player('__you__', timestamp, MapPoint(x=x, y=y, z=z))
-            self._map.update_()
 
     # events
     def _toggle_use_alt_map(self, _):
@@ -102,8 +102,7 @@ class Maps(ParserWindow):
 
         if next_zone != this_zone:
             self._map.load_map(next_zone)
-            self._map.update_()
-    
+
     def _toggle_show_poi(self, _):
         config.data['maps']['show_poi'] = not config.data['maps']['show_poi']
         config.save()
@@ -124,6 +123,9 @@ class Maps(ParserWindow):
         config.save()
         self._map.update_()
 
-    def _toggle_show_mouse_location(self, ):
+    def _toggle_show_mouse_location(self, _):
         config.data['maps']['show_mouse_location'] = not config.data['maps']['show_mouse_location']
         config.save()
+
+    def set_title_zone_name(self, zn):
+        self.set_title(config.data['general']['eq_charname'] + ' - ' + zn.title())

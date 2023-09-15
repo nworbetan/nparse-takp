@@ -18,17 +18,27 @@ class LogSelect(QDialog):
         listcharbox.move(10,10)
         listcharbox.currentTextChanged.connect(self.set_char_log)
 
-        btnchar = QPushButton(self)
-        btnchar.setToolTip("Cancel log selection")
-        btnchar.setText("Cancel")
-        btnchar.move(350,50)
-        btnchar.clicked.connect(self.cancelled)
+        self.accept_button = QPushButton(self)
+        self.accept_button.setToolTip("Accept log selection")
+        self.accept_button.setText("Accept")
+        self.accept_button.move(250,50)
+        self.accept_button.clicked.connect(self.acc)
+
+        cancel_button = QPushButton(self)
+        cancel_button.setToolTip("Cancel log selection")
+        cancel_button.setText("Cancel")
+        cancel_button.move(350,50)
+        cancel_button.clicked.connect(self.canc)
 
         if config.data['general']['eq_log_dir']:
             for logfile in sorted(glob.glob(config.data['general']['eq_log_dir'] + '/eqlog_*')):
                 listcharbox.addItem(logfile)
 
-    def cancelled(self):
+    def acc(self):
+        config.save()
+        self.accept()
+
+    def canc(self):
         self.reject()
 
     def set_char_log(self, text):
@@ -36,5 +46,4 @@ class LogSelect(QDialog):
         charname = re.sub(".*eqlog_","",text)
         charname = re.sub("_loginse.*","",charname)
         config.data['general']['eq_charname'] = charname
-        config.save()
-        self.close()
+        self.accept_button.setText("Load {}".format(charname))

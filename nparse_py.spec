@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['nparse.py'],
-             pathex=['D:\\nomns.github.com\\nparse'],
+             pathex=['C:\\nparse-takp'],
              binaries=[],
              datas=[],
              hiddenimports=[],

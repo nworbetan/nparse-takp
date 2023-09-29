@@ -1,4 +1,4 @@
-"""NomnsParse: Parsing tools for Project 1999."""
+"""NomnsParse: Parsing tools TAKP Fork."""
 import os
 import sys
 import webbrowser

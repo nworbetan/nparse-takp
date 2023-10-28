@@ -481,62 +481,82 @@ def get_spell_duration(spell, level):
         formula, duration = spell.duration_formula, spell.duration
 
     spell_ticks = 0
-    if formula == 0:
+    if formula == 0: # not a buff
         spell_ticks = 0
     if formula == 1:
-        spell_ticks = int(math.ceil(level / float(2.0)))
-        if spell_ticks > duration:
+        spell_ticks = int(math.ceil(level / 2))
+        if spell_ticks >= duration:
             spell_ticks = duration
+        else:
+            if spell_ticks < 1:
+                spell_ticks = 1
     if formula == 2:
-        spell_ticks = int(math.ceil(level / float(5.0) * 3))
-        if spell_ticks > duration:
+        if level <= 1:
+            spell_ticks = 6
+        else:
+            spell_ticks = int(math.ceil((level / 2) + 5))
+        if spell_ticks >= duration:
             spell_ticks = duration
+        else:
+            if spell_ticks < 1:
+                spell_ticks = 1
     if formula == 3:
         spell_ticks = int(level * 30)
-        if spell_ticks > duration:
+        if spell_ticks >= duration:
             spell_ticks = duration
-    if formula == 4:
-        if duration == 0:
-            spell_ticks = 50
         else:
+            if spell_ticks < 1:
+                spell_ticks = 1
+    if formula == 4:
+        spell_ticks = 50
+        if spell_ticks >= duration:
             spell_ticks = duration
     if formula == 5:
-        spell_ticks = duration
-        if spell_ticks == 0:
-            spell_ticks = 3
+        spell_ticks = 2
+        if spell_ticks >= duration:
+            spell_ticks = duration
     if formula == 6:
-        spell_ticks = int(math.ceil(level / float(2.0)))
-        if spell_ticks > duration:
+        spell_ticks = int((level / 2) + 2)
+        if spell_ticks >= duration:
             spell_ticks = duration
     if formula == 7:
         spell_ticks = level
-        if spell_ticks > duration:
+        if spell_ticks >= duration:
             spell_ticks = duration
     if formula == 8:
         spell_ticks = level + 10
-        if spell_ticks > duration:
+        if spell_ticks >= duration:
             spell_ticks = duration
+        else:
+            if spell_ticks < 1:
+                spell_ticks = 1
     if formula == 9:
         spell_ticks = int((level * 2) + 10)
-        if spell_ticks > duration:
+        if spell_ticks >= duration:
             spell_ticks = duration
+        else:
+            if spell_ticks < 1:
+                spell_ticks = 1
     if formula == 10:
-        spell_ticks = int(level * 3 + 10)
-        if spell_ticks > duration:
+        spell_ticks = int((level * 3) + 10)
+        if spell_ticks >= duration:
             spell_ticks = duration
+        else:
+            if spell_ticks < 1:
+                spell_ticks = 1
     if formula == 11:
-        spell_ticks = duration
+        spell_ticks = int((level * 30) + 90)
+        if spell_ticks >= duration:
+            spell_ticks = duration
+        else:
+            if spell_ticks < 1:
+                spell_ticks = 1
     if formula == 12:
-        spell_ticks = duration
-    if formula == 15:
-        spell_ticks = duration
+        spell_ticks = int(level / 4)
+        if spell_ticks >= duration:
+            spell_ticks = duration
     if formula == 50:
         spell_ticks = 72000
-    if formula == 3600:
-        if duration == 0:
-            spell_ticks = 3600
-        else:
-            spell_ticks = duration
     return spell_ticks
 
 
